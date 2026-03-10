@@ -38,7 +38,9 @@ router.get('/stats', async (req, res) => {
 router.get('/', async (req, res) => {
     try {
         let filters = {};
-        if (req.query.type) filters.type = req.query.type;
+        if (req.query.type) {
+            filters.type = { $regex: new RegExp(`^${req.query.type}$`, 'i') };
+        }
         if (req.query.name) {
             filters["name.english"] = { $regex: req.query.name, $options: 'i' };
         }
