@@ -7,12 +7,18 @@ const userSchema = new mongoose.Schema({
     favorites: [{ type: Number }] // Tableau d'IDs de Pokémon
 });
 
-// CETTE PARTIE EST ESSENTIELLE POUR LE MOT DE PASSE
-userSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) return next();
-    this.password = await bcrypt.hash(this.password, 10);
-    next();
+// CORRECTION : Utilise "function" classique pour avoir accès à "this"
+userSchema.pre('save', async function() {
+    // Si le mot de passe n'est pas modifié, on s'arrête là
+    if (!this.isModified('password')) return;
+
+    try {
+        // On hashe directement
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password, salt);
+    } catch (error) {
+        throw error; // Mongoose attrapera l'erreur
+    }
 });
 
 export default mongoose.model('User', userSchema);
-
